@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #231f20; /* Portland Thorns dark gray */
+            color: #e31c79; /* Portland Thorns magenta */
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 2.5rem;
+            color: #e31c79; /* Portland Thorns magenta */
+        }
+        #word {
+            font-size: 2rem;
+            letter-spacing: 0.5em;
+            margin: 20px 0;
+            color: #fff; /* White text for visibility */
+        }
+        #keyboard button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #e31c79; /* Portland Thorns magenta */
+            color: #fff; /* White text */
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #keyboard button:hover {
+            background-color: #d81b6f; /* Slightly darker magenta */
+        }
+        #keyboard button:disabled {
+            background-color: #999;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        #message {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #fff; /* White text for visibility */
+        }
+        #hangman-drawing {
+            margin: 20px 0;
+            color: #fff; /* White text for visibility */
+        }
+        #controls {
+            margin: 20px 0;
+        }
+        #controls button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #e31c79; /* Portland Thorns magenta */
+            color: #fff; /* White text */
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #controls button:hover {
+            background-color: #d81b6f; /* Slightly darker magenta */
+        }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <div id="controls">
+        <button id="start-button">Start Game</button>
+        <button id="restart-button" style="display: none;">Restart Game</button>
+    </div>
+    <div id="hangman-drawing"></div>
+    <div id="word"></div>
+    <div id="keyboard" style="display: none;"></div>
+    <div id="message"></div>
+
+    <script>
+        const words = ["javascript", "hangman", "programming", "coding", "challenge"];
+        let randomWord;
+        let guessedWord;
+        let incorrectGuesses;
+        const maxGuesses = 6;
+
+        const wordDisplay = document.getElementById("word");
+        const messageDisplay = document.getElementById("message");
+        const keyboard = document.getElementById("keyboard");
+        const hangmanDrawing = document.getElementById("hangman-drawing");
+        const startButton = document.getElementById("start-button");
+        const restartButton = document.getElementById("restart-button");
+
+        function initializeGame() {
+            randomWord = words[Math.floor(Math.random() * words.length)];
+            guessedWord = Array(randomWord.length).fill('_');
+            incorrectGuesses = 0;
+            wordDisplay.textContent = guessedWord.join(' ');
+            messageDisplay.textContent = "";
+            hangmanDrawing.innerHTML = `<p>Incorrect guesses: ${incorrectGuesses}/${maxGuesses}</p>`;
+            keyboard.innerHTML = "";
+            createKeyboard();
+        }
+
+        function updateWordDisplay() {
+            wordDisplay.textContent = guessedWord.join(' ');
+        }
+
+        function updateHangmanDrawing() {
+            hangmanDrawing.innerHTML = `<p>Incorrect guesses: ${incorrectGuesses}/${maxGuesses}</p>`;
+        }
+
+        function createKeyboard() {
+            const alphabet = "abcdefghijklmnopqrstuvwxyz";
+            for (let letter of alphabet) {
+                const button = document.createElement("button");
+                button.textContent = letter;
+                button.addEventListener("click", () => handleGuess(letter, button));
+                keyboard.appendChild(button);
+            }
+        }
+
+        function handleGuess(letter, button) {
+            button.disabled = true;
+
+            if (randomWord.includes(letter)) {
+                for (let i = 0; i < randomWord.length; i++) {
+                    if (randomWord[i] === letter) {
+                        guessedWord[i] = letter;
+                    }
+                }
+                updateWordDisplay();
+
+                if (!guessedWord.includes('_')) {
+                    messageDisplay.textContent = "Congratulations! You won!";
+                    disableAllButtons();
+                    restartButton.style.display = "inline-block";
+                }
+            } else {
+                incorrectGuesses++;
+                updateHangmanDrawing();
+
+                if (incorrectGuesses >= maxGuesses) {
+                    messageDisplay.textContent = `Game Over! The word was: ${randomWord}`;
+                    disableAllButtons();
+                    restartButton.style.display = "inline-block";
+                }
+            }
+        }
+
+        function disableAllButtons() {
+            const buttons = keyboard.querySelectorAll("button");
+            buttons.forEach(button => button.disabled = true);
+        }
+
+        startButton.addEventListener("click", () => {
+            initializeGame();
+            keyboard.style.display = "block";
+            startButton.style.display = "none";
+            restartButton.style.display = "none";
+        });
+
+        restartButton.addEventListener("click", () => {
+            initializeGame();
+            restartButton.style.display = "none";
+        });
+
+        // Initialize UI
+        wordDisplay.textContent = "Press Start to Begin";
+    </script>
+</body>
+</html>
